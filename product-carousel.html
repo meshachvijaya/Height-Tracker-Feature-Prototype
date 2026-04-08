@@ -1,0 +1,176 @@
+<style>
+  .hm-carousel {
+    position: relative;
+  }
+  .hm-carousel__track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 6px 0 10px;
+    scroll-behavior: smooth;
+  }
+  .hm-carousel__track::-webkit-scrollbar {
+    height: 6px;
+  }
+  .hm-carousel__track::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 999px;
+  }
+  .hm-carousel__slide {
+    flex: 0 0 16.66%;
+    scroll-snap-align: start;
+  }
+  .hm-carousel__card {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f8f8;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hm-carousel__card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  .hm-carousel__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 1 / 1;
+  }
+  .hm-carousel__info {
+    padding: 12px;
+  }
+  .hm-carousel__title {
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    color: #222;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .hm-carousel__price-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hm-carousel__price {
+    font-size: 14px;
+    font-weight: 500;
+    color: #f27522;
+  }
+  .hm-carousel__price--compare {
+    font-size: 12px;
+    font-weight: 500;
+    color: #919191;
+    text-decoration: line-through;
+  }
+  .hm-carousel__btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+  }
+  .hm-carousel__btn:hover {
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  }
+  .hm-carousel__btn--prev { left: -10px; }
+  .hm-carousel__btn--next { right: -10px; }
+
+  @media (max-width: 1199px) {
+    .hm-carousel__slide { flex-basis: 25%; }
+  }
+  @media (max-width: 767px) {
+    .hm-carousel__slide { flex-basis: 40%; } /* ~2.5 items per view */
+    .hm-carousel__btn { display: none; }
+    .hm-carousel__price-wrapper {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .hm-carousel__price {
+      order: 1; /* Price on top */
+    }
+    .hm-carousel__price--compare {
+      order: 2; /* Compare price at bottom */
+    }
+  }
+</style>
+
+<div class="hm-carousel" data-hm-carousel>
+  <button type="button" class="hm-carousel__btn hm-carousel__btn--prev" data-hm-carousel-prev aria-label="Previous">‹</button>
+  <div class="hm-carousel__track" data-hm-carousel-track></div>
+  <button type="button" class="hm-carousel__btn hm-carousel__btn--next" data-hm-carousel-next aria-label="Next">›</button>
+</div>
+
+<script>
+  (() => {
+    const products = [
+      // Products with discount: price (sale price), comparePrice (regular price)
+      { title: "NEW CalMagZinc Drink (7s)", image: "https://coolvita.id/cdn/shop/files/CalMagZinc_Event_PDP_New.jpg?v=1765442972", url: "https://coolvita.id/products/calmagzinc-drink?variant=45739232395435", price: "Rp 84.900", comparePrice: "Rp 129.900" },
+      { title: "NEW CalMagZinc Drink (7s) - 2 Box", image: "https://coolvita.id/cdn/shop/files/CalMagZinc_Event_PDP_2_Box.jpg?v=1765442972", url: "https://coolvita.id/products/calmagzinc-drink?variant=45739232428203", price: "Rp 168.900", comparePrice: "Rp 259.800" },
+      { title: "NEW CalMagZinc Drink (7s) - 4 Box", image: "https://coolvita.id/cdn/shop/files/CalMagZinc_Event_PDP_4_Box.jpg?v=1765442972", url: "https://coolvita.id/products/calmagzinc-drink?variant=45739232460971", price: "Rp 289.900", comparePrice: "Rp 519.600" },
+      { title: "NEW CalMagZinc Drink (7s) - 8 Box", image: "https://coolvita.id/cdn/shop/files/CalMagZinc_Event_PDP_8_Box.jpg?v=1765442972", url: "https://coolvita.id/products/calmagzinc-drink?variant=45739232493739", price: "Rp 578.900", comparePrice: "Rp 1.039.200" },
+      // Products without discount: price only, comparePrice is null or empty
+      { title: "Young Ladies Glowup Pack", image: "https://coolvita.id/cdn/shop/files/Young_Ladies.jpg?v=1762939276", url: "https://coolvita.id/products/young-ladies-glowup-pack?variant=45766988464299", price: "Rp 568.316", comparePrice: null },
+      { title: "Trial Set Kids", image: "https://coolvita.id/cdn/shop/files/Trial_Set_Kids_dtc.jpg?v=1763103158", url: "https://coolvita.id/products/trial-set-kids?variant=45766758662315", price: "Rp 420.947", comparePrice: null },
+      { title: "Family Premium Package", image: "https://coolvita.id/cdn/shop/files/Family_Premium_Package.jpg?v=1762939251", url: "https://coolvita.id/products/family-premium-package?variant=45768778317995", price: "Rp 1.052.526", comparePrice: null },
+      { title: "Go Grow Travel Set", image: "https://coolvita.id/cdn/shop/files/Go_grow_Travel.jpg?v=1762939218", url: "https://coolvita.id/products/gogrow-travel-set-1?variant=45766847004843", price: "Rp 199.985", comparePrice: null }
+    ];
+
+    const root = document.querySelector("[data-hm-carousel]");
+    const track = root?.querySelector("[data-hm-carousel-track]");
+    const prev = root?.querySelector("[data-hm-carousel-prev]");
+    const next = root?.querySelector("[data-hm-carousel-next]");
+
+    if (!root || !track) return;
+
+    track.innerHTML = products.map((p) => {
+      // Condition 1: Product with discount (has comparePrice)
+      // Show: sale price (orange) + strike-through compare price (gray)
+      // Condition 2: Product without discount (no comparePrice)
+      // Show: flat price only (orange)
+      const hasDiscount = p.comparePrice && p.comparePrice.trim() !== '';
+      
+      return `
+      <div class="hm-carousel__slide">
+        <a class="hm-carousel__card" href="${p.url}" title="${p.title}">
+          <img class="hm-carousel__image" src="${p.image}" alt="${p.title}" loading="lazy">
+          <div class="hm-carousel__info">
+            <h3 class="hm-carousel__title">${p.title}</h3>
+            <div class="hm-carousel__price-wrapper">
+              ${hasDiscount 
+                ? `<span class="hm-carousel__price">${p.price}</span><span class="hm-carousel__price--compare">${p.comparePrice}</span>`
+                : `<span class="hm-carousel__price">${p.price}</span>`
+              }
+            </div>
+          </div>
+        </a>
+      </div>
+    `;
+    }).join("");
+
+    const scrollAmount = () => track.clientWidth * 0.8;
+    const scrollByAmount = (dir) => {
+      track.scrollBy({ left: dir * scrollAmount(), behavior: "smooth" });
+    };
+
+    prev?.addEventListener("click", () => scrollByAmount(-1));
+    next?.addEventListener("click", () => scrollByAmount(1));
+  })();
+</script>

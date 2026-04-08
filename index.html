@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Height Meter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Asap, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            text-align: center;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-message {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Height Meter</h1>
+        <form id="heightForm">
+            <div class="form-group">
+                <label for="name">Nama</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="age">Umur</label>
+                <input type="number" id="age" name="age" min="1" max="120" required>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Jenis Kelamin</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Pilih</option>
+                    <option value="Male">Laki-laki</option>
+                    <option value="Female">Perempuan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="height">Tinggi Badan</label>
+                <input type="number" id="height" name="height" min="30" max="250" step="0.1" required>
+            </div>
+
+            <div id="error" class="error"></div>
+
+            <button type="submit">Cek Tinggi Badan</button>
+        </form>
+
+        <div id="result" class="result">
+            <div class="result-message" id="resultMessage"></div>
+            <img id="resultImage" class="result-image" alt="Result">
+        </div>
+    </div>
+
+    <script>
+        // Reference table data
+        const referenceTable = {
+            1: { Male: { min: 70, max: 85 }, Female: { min: 65, max: 82 } },
+            2: { Male: { min: 80, max: 97 }, Female: { min: 75, max: 95 } },
+            3: { Male: { min: 85, max: 100 }, Female: { min: 80, max: 100 } },
+            4: { Male: { min: 90, max: 115 }, Female: { min: 85, max: 115 } },
+            5: { Male: { min: 100, max: 120 }, Female: { min: 90, max: 120 } },
+            6: { Male: { min: 105, max: 125 }, Female: { min: 95, max: 125 } },
+            7: { Male: { min: 110, max: 140 }, Female: { min: 100, max: 135 } },
+            8: { Male: { min: 115, max: 145 }, Female: { min: 110, max: 140 } },
+            9: { Male: { min: 120, max: 150 }, Female: { min: 115, max: 145 } },
+            10: { Male: { min: 125, max: 155 }, Female: { min: 120, max: 150 } },
+            11: { Male: { min: 130, max: 160 }, Female: { min: 125, max: 155 } },
+            12: { Male: { min: 135, max: 165 }, Female: { min: 130, max: 155 } }
+        };
+
+        // Image URLs (desktop / tablet)
+        const desktopImages = {
+            below: 'https://cdn.shopify.com/s/files/1/0653/9575/3131/files/Banner_New.png?v=1763115888',
+            normal: 'https://cdn.shopify.com/s/files/1/0653/9575/3131/files/Banner_New.png?v=1763115888',
+            above: 'https://cdn.shopify.com/s/files/1/0653/9575/3131/files/Banner_New.png?v=1763115888'
+        };
+
+        // Image URLs (mobile)
+        const mobileImages = {
+            below: 'https://cdn.shopify.com/s/files/1/0653/9575/3131/files/Banner_New.png?v=1763115789',
+            normal: 'https://cdn.shopify.com/s/files/1/0653/9575/3131/files/Banner_New.png?v=1763115789',
+            above: 'https://cdn.shopify.com/s/files/1/0653/9575/3131/files/Banner_New.png?v=1763115789'
+        };
+
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
+        function checkHeight(age, gender, height) {
+            // Get reference data for the age
+            const ageData = referenceTable[age];
+            
+            if (!ageData) {
+                return null; // Age not in reference table
+            }
+
+            // Get gender-specific data
+            const genderData = ageData[gender];
+            if (!genderData) {
+                return null;
+            }
+
+            const min = genderData.min;
+            const max = genderData.max;
+
+            // Compare height
+            if (height < min) {
+                return { status: 'below', message: 'Di bawah Rata-rata' };
+            } else if (height >= min && height <= max) {
+                return { status: 'normal', message: 'Normal' };
+            } else {
+                return { status: 'above', message: 'Di atas Rata-rata' };
+            }
+        }
+
+        document.getElementById('heightForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('error');
+            const resultDiv = document.getElementById('result');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultImage = document.getElementById('resultImage');
+            
+            // Clear previous errors and results
+            errorDiv.textContent = '';
+            resultDiv.classList.remove('show');
+
+            // Get form values
+            const name = document.getElementById('name').value.trim();
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const height = parseFloat(document.getElementById('height').value);
+
+            // Validation
+            if (!name || !age || !gender || !height) {
+                errorDiv.textContent = 'Silakan isi semua field.';
+                return;
+            }
+
+            if (age < 1 || age > 12) {
+                errorDiv.textContent = 'Umur harus antara 1 dan 12.';
+                return;
+            }
+
+            if (height < 30 || height > 250) {
+                errorDiv.textContent = 'Tinggi badan harus antara 30 dan 250 cm.';
+                return;
+            }
+
+            // Check if age is in reference table
+            if (!referenceTable[age]) {
+                errorDiv.textContent = 'Umur tidak ditemukan dalam tabel referensi. Silakan masukkan umur antara 1-12.';
+                return;
+            }
+
+            // Check height and get result
+            const result = checkHeight(age, gender, height);
+            
+            if (result) {
+                resultMessage.textContent = `${name}, tinggi badan kamu ${result.message}`;
+
+                // Choose image set based on device type and result status
+                const images = isMobileDevice() ? mobileImages : desktopImages;
+                resultImage.src = images[result.status];
+                resultImage.alt = result.message;
+                resultDiv.classList.add('show');
+            } else {
+                errorDiv.textContent = 'Tidak dapat memproses data kamu. Silakan cek kembali inputan kamu.';
+            }
+        });
+    </script>
+</body>
+</html>
+

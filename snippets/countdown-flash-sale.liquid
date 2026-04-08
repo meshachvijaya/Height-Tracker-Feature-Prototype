@@ -1,0 +1,250 @@
+{% comment %}
+  Countdown Flash Sale ⚡
+  Place this file in snippets/countdown-flash-sale.liquid
+  Usage: {% render 'countdown-flash-sale' %}
+  Edit the flash_sale_end value below to change the end datetime/timezone.
+{% endcomment %}
+
+{% assign flash_sale_end = "2025-12-12T23:59:59+07:00" %}
+
+<div
+  id="flash-sale-countdown"
+  class="flash-sale-countdown"
+  role="region"
+  aria-live="polite"
+  aria-label="Flash Sale countdown"
+  data-end="{{ flash_sale_end }}"
+>
+  <div class="flash-sale-inner">
+    <span class="flash-sale-badge">Flash Sale ⚡</span>
+    <div class="flash-sale-text">
+      <strong class="flash-sale-title">Ends in</strong>
+      <div class="countdown-timer" aria-hidden="false">
+        <span class="countdown-part">
+          <span class="countdown-value" id="ds">0</span><small>days</small>
+        </span>
+        <span class="countdown-sep">:</span>
+        <span class="countdown-part">
+          <span class="countdown-value" id="hs">00</span><small>hrs</small>
+        </span>
+        <span class="countdown-sep">:</span>
+        <span class="countdown-part">
+          <span class="countdown-value" id="ms">00</span><small>min</small>
+        </span>
+        <span class="countdown-sep">:</span>
+        <span class="countdown-part">
+          <span class="countdown-value" id="ss">00</span><small>sec</small>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="flash-sale-ended visually-hidden" id="flash-sale-ended">
+    <strong>Flash Sale ended</strong>
+  </div>
+</div>
+
+<style>
+  :root {
+    --fs-bg: #fff4e6;
+    --fs-card: #ffffff;
+    --fs-accent: #ff8a00;
+    --fs-accent-2: #ffb347;
+    --fs-text: #ff6a00;
+    --fs-subtle: #a15b00;
+    --fs-shadow: 0 10px 30px rgba(255, 138, 0, 0.25);
+    --fs-radius: 16px;
+  }
+
+  .flash-sale-countdown {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffe7c6 100%);
+    color: var(--fs-text);
+    padding: 14px 16px;
+    border-radius: var(--fs-radius);
+    display: inline-block;
+    font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    box-shadow: var(--fs-shadow);
+    border: 1px solid rgba(255, 138, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flash-sale-countdown::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(600px at 15% 30%, rgba(255, 174, 94, 0.35), transparent 50%),
+      radial-gradient(480px at 80% 10%, rgba(255, 214, 153, 0.4), transparent 45%);
+    pointer-events: none;
+  }
+
+  .flash-sale-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flash-sale-badge {
+    background: linear-gradient(135deg, var(--fs-accent) 0%, var(--fs-accent-2) 100%);
+    color: #5c2b00;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 13px;
+    box-shadow: 0 6px 16px rgba(255, 138, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  .flash-sale-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .flash-sale-title {
+    display: block;
+    font-size: 14px;
+    color: var(--fs-subtle);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .countdown-timer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 16px;
+    color: #ff5c00;
+  }
+
+  .countdown-part {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 58px;
+    padding: 9px 11px;
+    background: var(--fs-card);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 138, 0, 0.2);
+    box-shadow: 0 8px 20px rgba(255, 138, 0, 0.12);
+  }
+
+  .countdown-value {
+    font-size: 20px;
+    font-variant-numeric: tabular-nums;
+    color: #d75a00;
+  }
+
+  .countdown-part small {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--fs-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .countdown-sep {
+    opacity: 0.45;
+    font-weight: 800;
+    font-size: 18px;
+    transform: translateY(-2px);
+    color: #ff8a00;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .flash-sale-countdown.flash-sale-expired .flash-sale-inner {
+    opacity: 0.4;
+  }
+
+  @media (max-width: 640px) {
+    .flash-sale-countdown {
+      width: 100%;
+    }
+    .flash-sale-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .countdown-timer {
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .countdown-part {
+      min-width: 70px;
+      flex: 1 1 auto;
+    }
+  }
+</style>
+
+<script>
+(function(){
+  var container = document.getElementById('flash-sale-countdown');
+  if (!container) return;
+
+  var endIso = container.getAttribute('data-end');
+  var endDate = new Date(endIso);
+
+  var dEl = document.getElementById('ds');
+  var hEl = document.getElementById('hs');
+  var mEl = document.getElementById('ms');
+  var sEl = document.getElementById('ss');
+  var endedEl = document.getElementById('flash-sale-ended');
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function update(){
+    var now = new Date();
+    var diff = endDate - now;
+
+    if (isNaN(endDate.getTime())) {
+      container.querySelector('.flash-sale-text').textContent = 'Invalid sale end date';
+      clearInterval(timer);
+      return;
+    }
+
+    if (diff <= 0) {
+      dEl.textContent = '0';
+      hEl.textContent = '00';
+      mEl.textContent = '00';
+      sEl.textContent = '00';
+      endedEl.classList.remove('visually-hidden');
+      container.classList.add('flash-sale-expired');
+      clearInterval(timer);
+      return;
+    }
+
+    var seconds = Math.floor(diff / 1000);
+    var days = Math.floor(seconds / (24*3600));
+    seconds -= days * 24*3600;
+    var hours = Math.floor(seconds / 3600);
+    seconds -= hours * 3600;
+    var minutes = Math.floor(seconds / 60);
+    var secs = seconds - minutes * 60;
+
+    dEl.textContent = String(days);
+    hEl.textContent = pad(hours);
+    mEl.textContent = pad(minutes);
+    sEl.textContent = pad(secs);
+  }
+
+  update();
+  var timer = setInterval(update, 1000);
+})();
+</script>
+
